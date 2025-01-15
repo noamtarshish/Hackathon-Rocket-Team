@@ -14,9 +14,9 @@ class SpeedTestServer:
         self.tcp_port = random.randint(30001, 40000)
         self.running = True
 
-    def safe_print(self, message):
+    def safe_print(self, message, color_code="\033[0m"):
         with print_lock:
-            print(message)
+            print(f"{color_code}{message}\033[0m")
 
     def get_IP(self):
         # Get all network interfaces
@@ -43,12 +43,13 @@ class SpeedTestServer:
 
             # Get broadcast address
             network = '.'.join(server_ip.split('.')[:-1] + ['255'])
-            self.safe_print(f"Broadcasting to address: {network}")
+            self.safe_print(f"Broadcasting to address: {network}", "\033[92m")  # Green
 
             while self.running:
                 try:
                     sock.sendto(offer_packet, (network, BROADCAST_PORT))
                     sock.sendto(offer_packet, ('<broadcast>', BROADCAST_PORT))
+                    self.safe_print(f"Broadcast sent on UDP port {BROADCAST_PORT}", "\033[93m")
                 except Exception as e:
                     self.safe_print(f"Broadcast error: {e}")
                 time.sleep(1)  # Broadcast every second
@@ -60,21 +61,21 @@ class SpeedTestServer:
             (magic, msg_type, file_size, endline_char) = struct.unpack('!IBQ1s', data)
             if magic != MAGIC_COOKIE or msg_type != TYPE_REQUEST or endline_char != b"\n":
                 raise ValueError("Invalid TCP request format")
-            self.safe_print(f"Received TCP request from {addr}, file size: {file_size} bytes")
+            self.safe_print(f"Received TCP request from {addr}, file size: {file_size} bytes", "\033[92m")  # Green
 
             payload = struct.pack("!IBQQ", MAGIC_COOKIE, TYPE_PAYLOAD, 1, 1) + b"x" * file_size
             conn.send(payload)
 
-            self.safe_print(f"TCP transfer to {addr} completed successfully")
+            self.safe_print(f"TCP transfer to {addr} completed successfully", "\033[92m")  # Green
         except Exception as e:
-            self.safe_print(f"Error during TCP request from {addr}: {e}")
+            self.safe_print(f"Error during TCP request from {addr}: {e}", "\033[91m")  # Red
         finally:
             conn.close()
 
     def handle_udp(self, sock, addr, file_size):
         """Process incoming UDP requests."""
         try:
-            self.safe_print(f"Received UDP request from {addr}, file size: {file_size} bytes")
+            self.safe_print(f"Received UDP request from {addr}, file size: {file_size} bytes", "\033[92m")  # Green
 
             total_segments = (file_size + 1023) // 1024
 
@@ -85,13 +86,13 @@ class SpeedTestServer:
                 with udp_lock:
                     sock.sendto(packet, addr)
 
-            self.safe_print(f"UDP transfer to {addr} completed successfully")
+            self.safe_print(f"UDP transfer to {addr} completed successfully", "\033[92m")  # Green
         except Exception as e:
-            self.safe_print(f"Error during UDP request from {addr}: {e}")
+            self.safe_print(f"Error during UDP request from {addr}: {e}", "\033[91m")  # Red
 
     def listen_requests(self):
         """Listen for TCP and UDP client requests."""
-        self.safe_print("Server is waiting for client connections...")
+        self.safe_print("Server is waiting for client connections...", "\033[94m")  # Blue
         tcp_thread = threading.Thread(target=self.listen_tcp)
         udp_thread = threading.Thread(target=self.listen_udp)
 
@@ -99,7 +100,7 @@ class SpeedTestServer:
             tcp_thread.start()
             udp_thread.start()
         except Exception as e:
-            self.safe_print(f"Error while listening for connections: {e}")
+            self.safe_print(f"Error while listening for connections: {e}", "\033[91m")  # Red
 
     def listen_tcp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_sock:
@@ -119,7 +120,7 @@ class SpeedTestServer:
                     if magic == MAGIC_COOKIE and msg_type == TYPE_REQUEST:
                         threading.Thread(target=self.handle_udp, args=(udp_sock, addr, file_size)).start()
                 except Exception as e:
-                    self.safe_print(f"Invalid UDP request from {addr}: {e}")
+                    self.safe_print(f"Invalid UDP request from {addr}: {e}", "\033[91m")  # Red
 
     def start_server(self):
         """Start the server."""
@@ -134,4 +135,4 @@ if __name__ == "__main__":
         server.start_server()
     except KeyboardInterrupt:
         server.running = False
-        print("Shutting down the server...")
+        print("\033[91mShutting down the server...\033[0m")  # Red
