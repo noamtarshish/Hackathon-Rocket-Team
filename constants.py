@@ -1,12 +1,18 @@
-import sys
-# Ports
-UDP_PORT = 13117
-TCP_PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 2115
+# constants.py
 
-# Packet Magic Cookie
+# Network Settings
+BROADCAST_PORT = 13117
 MAGIC_COOKIE = 0xabcddcba
 
 # Message Types
-MESSAGE_TYPE_OFFER = 0x2
-MESSAGE_TYPE_REQUEST = 0x3
-MESSAGE_TYPE_PAYLOAD = 0x4
+TYPE_OFFER = 0x2
+TYPE_REQUEST = 0x3
+TYPE_PAYLOAD = 0x4
+
+# Sizes
+RECEIVE_SIZE = 1024
+HEADER_SIZE = 21
+
+# Ports
+UDP_PORT_RANGE = (20000, 30000)
+TCP_PORT_RANGE = (30001, 40000)
