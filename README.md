@@ -4,8 +4,7 @@
 
 ## 📋 Project Overview
 
-This project implements a network speed testing application as part of a Intro to Data Communications Hackathon Course. The main objective is to create a client-server system that compares TCP and UDP performance under shared network conditions. A key requirement is **interoperability** - our implementation must be compatible with other teams' clients and servers in the course.
-
+This project implements a network speed testing application as part of a Intro to Data Communications Hackathon Course. The main objective is to create a client-server system that compares TCP and UDP performance under shared network conditions. 
 ### Core Objectives
 - Compare TCP and UDP download performance
 - Analyze how protocols share network resources
